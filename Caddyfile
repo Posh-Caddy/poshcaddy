@@ -1,0 +1,21 @@
+{
+    http_port 9054
+    order cgi first
+}
+
+localhost:9054
+
+cgi /* /app/cgi/{path}.ps1 {
+
+}
+
+cgi *.ps1 /app/cgi/{path} {
+
+}
+
+file_server {
+    root /app/public
+    hide /cgi/
+}
+
+try_files {path}.html
