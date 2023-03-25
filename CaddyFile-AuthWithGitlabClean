@@ -1,0 +1,52 @@
+{
+	http_port 9054
+	order authenticate before respond
+	order authorize before basicauth
+	order cgi last
+
+	security {
+		oauth identity provider gitlab {
+			realm gitlab
+			driver gitlab
+			domain_name gitlab.com
+			client_id {env.GITLAB_CLIENT_ID}
+			client_secret {env.GITLAB_CLIENT_SECRET}
+			scopes openid email profile
+		}
+
+		authentication portal authz_proxy_portal {
+			enable identity provider gitlab
+			transform user {
+				match realm gitlab
+				action add role authp/user
+				ui link "My Website" http://localhost:9054/app/ icon "las la-star"
+			}
+			transform user {
+				match realm gitlab
+				match email 
+				action add role authp/admin
+			}
+		}
+
+		authorization policy default_authz_policy {
+			# disable auth redirect
+			set auth url http://localhost:9054/oauth2/gitlab
+			allow roles authp/user authp/admin
+			validate bearer header
+		}
+	}	
+}
+
+localhost:9054 {
+	authenticate with authz_proxy_portal
+}
+
+localhost:9054/app/ {
+	authorize with default_authz_policy
+	cgi /app/* C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -File C:\posh-caddy\cgi\helloworld.ps1 {
+
+	}
+}
+
+
+
