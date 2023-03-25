@@ -23,7 +23,7 @@
 			}
 			transform user {
 				match realm gitlab
-				match email 
+				match email {env.ADMIN_EMAIL}
 				action add role authp/admin
 			}
 		}
